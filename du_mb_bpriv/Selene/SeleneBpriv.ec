@@ -334,15 +334,15 @@ module BCCA(V:VotingSystem, CP:CommitmentProtocol, A:DU_MB_BPRIV_adv, S:Simulato
 
 section DU_MB_BPRIV.
 
-declare module G  <: GOracle.Oracle { BP, HRO.ERO, BPS, BS, BCCA }.   
-declare module Ev <: PKEvo.Scheme { BP, HRO.ERO, G, BPS, BS, BCCA}.  
-declare module S  <: Simulator { BP, HRO.ERO, G, Ev, BPS, BS, BCCA }. 
-declare module Ve <: Verifier { BP, HRO.ERO, G, Ev, S, BPS, BS, BCCA }. 
-declare module P  <: Prover { BP, HRO.ERO, G, Ev, S, Ve, BPS, BS, BCCA }. 
-declare module R  <: VotingRelationS { BP, HRO.ERO, G, Ev, S, Ve, P, BPS, BS, BCCA }.
-declare module C  <: ValidIndS { BP, HRO.ERO, G, Ev, S, Ve, P, BPS, BS, R, BCCA }. 
-declare module A  <: DU_MB_BPRIV_adv { BP, HRO.ERO, G, Ev, S, Ve, P, C, BPS, BS, R, BCCA}. 
-declare module CP <: CommitmentProtocol { BP, HRO.ERO, G, Ev, S, Ve, P, C, BPS, BS, A, R, BCCA}. 
+declare module G  <: GOracle.Oracle { -BP, -HRO.ERO, -BPS, -BS, -BCCA }.   
+declare module Ev <: PKEvo.Scheme { -BP, -HRO.ERO, -G, -BPS, -BS, -BCCA}.  
+declare module S  <: Simulator { -BP, -HRO.ERO, -G, -Ev, -BPS, -BS, -BCCA }. 
+declare module Ve <: Verifier { -BP, -HRO.ERO, -G, -Ev, -S, -BPS, -BS, -BCCA }. 
+declare module P  <: Prover { -BP, -HRO.ERO, -G, -Ev, -S, -Ve, -BPS, -BS, -BCCA }. 
+declare module R  <: VotingRelationS { -BP, -HRO.ERO, -G, -Ev, -S, -Ve, -P, -BPS, -BS, -BCCA }.
+declare module C  <: ValidIndS { -BP, -HRO.ERO, -G, -Ev, -S, -Ve, -P, -BPS, -BS, -R, -BCCA }. 
+declare module A  <: DU_MB_BPRIV_adv { -BP, -HRO.ERO, -G, -Ev, -S, -Ve, -P, -C, -BPS, -BS, -R, -BCCA}. 
+declare module CP <: CommitmentProtocol { -BP, -HRO.ERO, -G, -Ev, -S, -Ve, -P, -C, -BPS, -BS, -A, -R, -BCCA}. 
 
 (*** Lossless assumptions ***)
 
@@ -352,25 +352,25 @@ declare axiom Go_ll : islossless G.o.
 
 
 (** MB-BPRIV adversary **)
-declare axiom A_a1_ll (O <: DU_MB_BPRIV_oracles { A }):
+declare axiom A_a1_ll (O <: DU_MB_BPRIV_oracles { -A }):
   islossless O.vote => islossless O.board => islossless O.h => islossless O.g => islossless A(O).create_bb. 
-declare axiom A_a2_ll (O <: DU_MB_BPRIV_oracles { A }): 
+declare axiom A_a2_ll (O <: DU_MB_BPRIV_oracles { -A }): 
   islossless O.board => islossless O.h => islossless O.g => islossless A(O).get_tally. 
-declare axiom A_a3_ll (O <: DU_MB_BPRIV_oracles { A }): 
+declare axiom A_a3_ll (O <: DU_MB_BPRIV_oracles { -A }): 
   islossless O.verify => islossless O.h => islossless O.g => islossless A(O).final_guess. 
-declare axiom A_a4_ll (O <: DU_MB_BPRIV_oracles { A }): 
+declare axiom A_a4_ll (O <: DU_MB_BPRIV_oracles { -A }): 
   islossless O.h => islossless O.g => islossless A(O).initial_guess. 
 
 
 (** Proof system **)
-declare axiom PS_p_ll (G <: GOracle.POracle) : islossless G.o => islossless P(G).prove. 
-declare axiom PS_v_ll (G <: GOracle.POracle) : islossless G.o => islossless Ve(G).verify. 
+declare axiom PS_p_ll (G <: GOracle.POracle { -P }) : islossless G.o => islossless P(G).prove. 
+declare axiom PS_v_ll (G <: GOracle.POracle { -Ve }) : islossless G.o => islossless Ve(G).verify. 
 
 
 (** Encryption **)
-declare axiom Ev_kg_ll  (H <: HOracle.POracle) : islossless H.o => islossless Ev(H).kgen. 
-declare axiom Ev_enc_ll (H <: HOracle.POracle) : islossless H.o => islossless Ev(H).enc. 
-declare axiom Ev_dec_ll (H <: HOracle.POracle) : islossless H.o => islossless Ev(H).dec. 
+declare axiom Ev_kg_ll  (H <: HOracle.POracle { -Ev }) : islossless H.o => islossless Ev(H).kgen. 
+declare axiom Ev_enc_ll (H <: HOracle.POracle { -Ev }) : islossless H.o => islossless Ev(H).enc. 
+declare axiom Ev_dec_ll (H <: HOracle.POracle { -Ev }) : islossless H.o => islossless Ev(H).dec. 
  
 lemma Et_kg_ll  : islossless ElGamal.kg. 
 proof. 
@@ -405,7 +405,7 @@ declare axiom CP_open_ll : islossless CP.open.
 declare axiom R_m_ll : islossless R(Ev,HRO.ERO).main.
 
 (** ValidInd operator **)
-declare axiom C_vi_ll (H <: HOracle.POracle) : islossless H.o => islossless C(H).valid.
+declare axiom C_vi_ll (H <: HOracle.POracle { -C }) : islossless H.o => islossless C(H).valid.
 
 (*** Useful and necessary axioms and lemmas ***)
 local equiv So_ll2: S.o ~ S.o : ={arg, glob S} ==> ={res, glob S}.
@@ -505,8 +505,8 @@ op rem_fst4 (x : ('a * 'b * 'c * 'd)) = (x.`2, x.`3, x.`4).
 module type VotingAdvZK (H:HOracle.Oracle, O:GOracle.POracle) = {
   proc a1() : ((epkey * pkey * aux) * ((ident * upkey * commitment) *
                   cipher) list * (vote list * tracker list)) * (((ident,opening) fmap * eskey * PKEtr.skey) *
-                  ((ident * upkey * commitment) * cipher) list) {H.init H.o O.o}
-  proc a2(pi : (prf option)) : bool {H.o O.o}
+                  ((ident * upkey * commitment) * cipher) list) {H.init, H.o, O.o}
+  proc a2(pi : (prf option)) : bool {H.o, O.o}
 }.
 
 module BZK(Ev:PKEvo.Scheme, P:Prover, C:ValidIndS, Ve:Verifier, 
@@ -609,7 +609,7 @@ module BZK(Ev:PKEvo.Scheme, P:Prover, C:ValidIndS, Ve:Verifier,
 }. 
 
 (******* Losslessness for BZK ********)
-local lemma BZK_a1_ll (H <: HOracle.Oracle {BP, A}) (G <: GOracle.POracle {A}) : 
+local lemma BZK_a1_ll (H <: HOracle.Oracle { -BP, -A}) (G <: GOracle.POracle { -A }) : 
     islossless H.init => islossless H.o => islossless G.o =>
     islossless BZK(Ev,P,C,Ve,A,CP,H,G).a1. 
 proof. 
@@ -639,7 +639,7 @@ smt(@FSet). smt(). rewrite size_ge0. smt().
 by rewrite duni_ap_weight.  
 qed. 
 
-local lemma BZK_a2_ll (H <: HOracle.Oracle {A, BP}) (G <: GOracle.POracle {A, BP}) :
+local lemma BZK_a2_ll (H <: HOracle.Oracle { -A, -BP }) (G <: GOracle.POracle { -A, -BP }) :
   islossless H.o => islossless G.o => islossless BZK(Ev,P,C,Ve,A,CP,H,G).a2. 
 proof. 
 move => Ho_ll Go_ll. 
@@ -670,8 +670,8 @@ if => //. rnd;skip;progress. rewrite dboolE => />.
 hoare;call(_:true); [1..3: by auto]; first trivial.
 qed. 
 
-local lemma BZK_a2_ll' (H <: HOracle.Oracle {A, BP}) (G <: GOracle.POracle {A, BP})
-                        (P <: Prover {Ev,C,Ve,A,ZK_L,BPS,BP,H,G}) :
+local lemma BZK_a2_ll' (H <: HOracle.Oracle { -A, -BP }) (G <: GOracle.POracle { -A, -BP })
+                        (P <: Prover { -Ev, -C, -Ve, -A, -ZK_L, -BPS, -BP, -H, -G }) :
   islossless H.o => islossless G.o => islossless P(G).prove => islossless BZK(Ev,P,C,Ve,A,CP,H,G).a2. 
 proof. 
 move => Ho_ll Go_ll Pp_ll. 
@@ -1302,9 +1302,9 @@ qed.
 (*************** Lemma bounding the probability that the relation does not hold in ZK_L by ***************)
 (***************     the probability of returning true in the VFR game.                    ***************)
 
-local lemma ZKL_rel &m (H <: HOracle.Oracle {A, BPS, BP, BS, Ve, Ev, C, R, CP})
-                       (G <: GOracle.Oracle {A, BPS, BP, BS, Ve, Ev, H, R, C, CP})
-                       (P <: Prover {Ev, C, Ve, A, R, BPS, BP, BS, H, G, CP}) :
+local lemma ZKL_rel &m (H <: HOracle.Oracle { -A,  -BPS,  -BP,  -BS,  -Ve,  -Ev, -C, -R, -CP })
+                       (G <: GOracle.Oracle { -A,  -BPS,  -BP,  -BS,  -Ve,  -Ev, -C, -R, -CP, -H })
+                       (P <: Prover { -Ev,  -C,  -Ve,  -A,  -R,  -BPS,  -BP,  -BS,  -H,  -G,  -CP}) :
   BP.setidents{m} = BP.setH{m} `|` BP.setD{m} =>
   islossless H.o => islossless G.o => islossless P(G).prove =>
     Pr[ZK_L(R(Ev,H), P, BZK(Ev,P,C,Ve,A,CP,H), G).main() @ &m : !BPS.rel]
@@ -1363,8 +1363,8 @@ qed.
 (*************** Lemma bounding the probability that the relation does not hold in ZK_R by ***************)
 (***************     the probability of returning true in the VFR game.                    ***************)
 
-local lemma ZKR_rel &m (H <: HOracle.Oracle {A, BPS, BP, BS, Ve, Ev, C, CP, R})
-                       (S <: Simulator {Ev, C, CP, Ve, A, R, BPS, BP, BS, H}) :
+local lemma ZKR_rel &m (H <: HOracle.Oracle { -A, -BPS, -BP, -BS, -Ve, -Ev, -C, -CP, -R})
+                       (S <: Simulator { -Ev, -C, -CP, -Ve, -A, -R, -BPS, -BP, -BS, -H}) :
      BP.setidents{m} = BP.setH{m} `|` BP.setD{m} =>
      islossless H.o => islossless S.o => islossless S.prove =>
      Pr[ZK_R(R(Ev,H), S, BZK(Ev,P,C,Ve,A,CP,H)).main() @ &m : !BPS.rel] <=
