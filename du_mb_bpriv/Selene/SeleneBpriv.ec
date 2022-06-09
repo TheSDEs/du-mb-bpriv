@@ -416,9 +416,8 @@ declare axiom Ev_e_eq (ge: (glob Ev)):
    phoare[Ev(HRO.ERO).enc : (glob Ev) = ge ==> (glob Ev) = ge] = 1%r. 
 
 (*** Axioms linking key generation and get_epk operator ***)
-declare axiom Ev_kgen_get_epk (H <: HOracle.POracle):
- equiv [Ev(H).kgen ~ Ev(H).kgen : ={glob H, glob Ev} ==> ={glob H, glob Ev, res} /\ res{1}.`1 = get_epk res{1}.`2]. 
-
+declare axiom Ev_kgen_get_epk:
+ equiv [Ev(HRO.ERO).kgen ~ Ev(HRO.ERO).kgen : ={glob HRO.ERO, glob Ev} ==> ={glob HRO.ERO, glob Ev, res} /\ res{1}.`1 = get_epk res{1}.`2]. 
 
 (*** Sampling a list from list of all permutations doesn't fail ***)
 lemma duni_ap_weight (l : 'a list) : weight (duniform (allperms l)) = 1%r.  
@@ -1887,7 +1886,7 @@ inline*.
 wp;while(={BP.setidents, i0, pPk, pTr, pCo, pOp, tsk, tpk, trL, pi2}); first sim.
 wp;while(={i0, BP.setidents, trL, pTr, glob CP, pPk, tpk}); first sim. 
 wp;rnd;while(={i0, BP.setidents, tpk, tpTr, trL}); first sim. 
-wp;rnd;call(Ev_kgen_get_epk HRO.ERO).
+wp;rnd;call Ev_kgen_get_epk.
 auto;call(_:true). 
 while (={w, glob HRO.ERO}); first by sim.
 auto;progress. rewrite (H13 id1 c3 pc). apply H16. trivial. rewrite (in_rem_ids id1 pc c3) => />. 
@@ -2689,7 +2688,7 @@ wp;inline*.
  wp;while(={i0, BP.setidents, tpk, tsk, pPk, pTr, pCo, pOp, trL, pi2}); first sim.  
 wp;while(={i0, BP.setidents, trL, pTr, glob CP, pPk, tpk}); first sim. 
 wp;rnd;while(={i0, BP.setidents, tpk, tpTr, trL}); first sim. 
-wp;rnd;call(Ev_kgen_get_epk HRO.ERO);auto;call(_:true);
+wp;rnd;call Ev_kgen_get_epk;auto;call(_:true);
 while(={w, glob HRO.ERO}); first sim. 
 auto;progress. 
 
@@ -3041,7 +3040,7 @@ wp;inline*.
 wp;while(={i0, BP.setidents, tpk, tsk, pPk, pTr, pCo, pOp, trL, pi2}); first sim.  
 wp;while(={i0, BP.setidents, trL, pTr, glob CP, pPk, tpk}); first sim. 
 wp;rnd;while(={i0, BP.setidents, tpk, tpTr, trL}); first sim. 
-wp;rnd;call(Ev_kgen_get_epk HRO.ERO);wp;call(_:true). 
+wp;rnd;call Ev_kgen_get_epk;wp;call(_:true). 
 while(={w, HRO.ERO.m}); first sim. 
 auto;progress. smt(@List). smt(@SmtMap). smt(@SmtMap @List).
 
@@ -4653,7 +4652,7 @@ wp;inline*.
 wp;while(={i0, BP.setidents, tpk, tsk, pPk, pTr, pCo, pOp, trL, pi2}); first sim.  
 wp;while(={i0, BP.setidents, trL, pTr, glob CP, pPk, tpk}); first sim. 
 wp;rnd;while(={i0, BP.setidents, tpk, tpTr, trL}); first sim.   
-wp;rnd;call(Ev_kgen_get_epk HRO.ERO). wp;call(_:true). 
+wp;rnd;call Ev_kgen_get_epk. wp;call(_:true). 
 while(={w, HRO.ERO.m}); first sim. 
 auto;progress. 
 
@@ -5012,7 +5011,7 @@ if => //;auto;progress.
 wp;while(={BP.setidents, tpk, pPk, pTr, tsk, pCo, pOp, trL, pi2} /\ i0{1} = i{2});first sim. 
 wp;while(={glob CP, BP.setidents, tpk, trL, pTr, pPk} /\ i0{1} = i{2}); first sim. 
 wp;rnd;while(={BP.setidents, tpk, tpTr} /\ i0{1} = i{2}); first sim. 
-wp;rnd;wp;call(Ev_kgen_get_epk HRO.ERO). 
+wp;rnd;wp;call Ev_kgen_get_epk. 
 wp;call(_:true);while(={w, HRO.ERO.m});first sim. 
 auto;progress. smt(@List). smt(@SmtMap). rewrite (H11 i_R2). trivial. smt(@List).
 
@@ -5416,7 +5415,7 @@ if => //;auto;progress.
 wp;while(={BP.setidents, tpk, pPk, pTr, tsk, pCo, pOp, trL, pi2} /\ i0{1} = i{2}); first sim. 
 wp;while(={BP.setidents, tpk, trL, pTr, glob CP, pPk} /\ i0{1} = i{2}); first sim. 
 wp;rnd;while(={BP.setidents, tpk, tpTr, trL} /\ i0{1} = i{2}); first sim. 
-wp;rnd;wp;call(Ev_kgen_get_epk HRO.ERO). 
+wp;rnd;wp;call Ev_kgen_get_epk. 
 wp;call(_:true);while(={w, HRO.ERO.m});first sim. 
 auto;progress. smt(@List). smt(@SmtMap). rewrite (H11 i_R2); first trivial. smt(@List).
 

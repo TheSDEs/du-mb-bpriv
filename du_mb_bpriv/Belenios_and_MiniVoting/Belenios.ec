@@ -100,7 +100,7 @@ clone export MiniVotingSecurity_mb as MV2 with
 
 
 (* Labelled Public-Key Encryption Scheme  *)
-  module (IPKE(P: PSpke.Prover, Ve: PSpke.Verifier): Scheme) (O:HOracle.POracle) = {
+module (IPKE(P: PSpke.Prover, Ve: PSpke.Verifier): Scheme) (O:HOracle.POracle) = {
     
     proc kgen(): pkey * skey ={
       var sk; 
