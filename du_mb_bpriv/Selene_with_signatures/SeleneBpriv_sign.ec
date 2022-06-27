@@ -2851,11 +2851,22 @@ call(_:true); first by auto.
 if{2} => //. wp. 
 exists* (glob Ev){1}, BP.sk{1}, id{1}, ev{1}; elim* => gev sk id ev.
 call{1} (Edec_Odec_vo gev sk.`2 id ev). auto;progress.
+ 
+
 
 move: H6; rewrite mapP /drop_last_of4 //=; elim => x [Hxm [Hx1 [Hx2 Hx3]]].
 have Ho:= H2 x.`1 x.`3 x.`4 _; first by smt().
 
-smt(@List @SmtMap).
+have H6 : Some (oget (dec_cipher_vo BP.sk{2}.`2 (nth witness BP.bb'{2} j{2}).`1.`1
+               (nth witness BP.bb'{2} j{2}).`2 HRO.ERO.m{2})) =
+          Some (oget (onth (odflt [] BP.vmap{2}.[(nth witness BP.bb'{2} j{2}).`1.`1])
+               (find (fun (x0 : cipher * (cipher * signature) * vote * vote) =>
+               x0.`1 = (nth witness BP.bb'{2} j{2}).`2)
+               (odflt [] BP.vmap{2}.[(nth witness BP.bb'{2} j{2}).`1.`1])))).`4. 
+
+rewrite (H2 (nth witness BP.bb'{2} j{2}).`1.`1 (nth witness BP.bb'{2} j{2}).`2 x.`4); 1: smt(). 
+by rewrite -some_oget; 1: by smt().  
+smt(). 
 
 call(_: ={glob HRO.ERO}).  sim. auto;progress. 
 
@@ -3459,7 +3470,7 @@ case (ev{2} = (nth witness BP.bb0{2} i).`3) => Hev //=.
     rewrite /drop_last_of4 Hev Hid_bb0 Hpc_bb0 //=. 
     smt(@List). 
   move: Hdec; rewrite Hid -H12.
-  smt(someI). 
+  smt().
 
 have ->: !(find (fun (x : cipher * (cipher * signature) * vote * vote) =>
                x.`1 = (nth witness BP.bb0{2} i).`3) (odflt [] BP.vmap{1}.[id4]) 
@@ -3647,14 +3658,17 @@ seq 1 1 : (
       by done.
     case ( (pc, c, s1) \in (take i0{2} bb{2})); first by smt(). 
     move => not_in_take. 
-    have ? : (pc, c, s1) = nth witness bb{2} i0{2}. 
+    have H11 : (pc, c, s1) = nth witness bb{2} i0{2}. 
     + have H11 : (pc, c, s1) \in take (i0{2} + 1) bb{2} by smt().  
       have H12 : take (i0{2}+1) bb{2} = rcons (take i0{2} bb{2}) (nth witness bb{2} i0{2}). 
       + rewrite (take_nth witness i0{2} bb{2}). 
         + smt().  
         by done.  
-      smt(@List). 
-    smt(@SmtMap @List). 
+      smt(@List).  
+    have H12 : (pc, c, s1) = ((id0{2}, upk0{2}, supk0{2}, ct0{2}), ev0{2}, s0{2}) by rewrite H11 H0.  
+    have -> : pc.`1 = id0{2} by smt(). 
+    have -> : pc = (id0{2}, upk0{2}, supk0{2}, ct0{2}) by smt().
+    done.  
 
 auto;progress. smt(). rewrite (H4 id00 c (oget BP.pubmap{2}.[id00])). exact/H18.  trivial.  
 rewrite H9.  exact H18. trivial. 
@@ -3824,7 +3838,7 @@ while{1} ( ={BP.bb, BP.bb0, BP.bb1}
     move: H12. 
     smt(@List).
   + move: H11; rewrite size_cat //=; move => H11.
-    rewrite map_cat nth_cat.   
+    rewrite map_cat nth_cat.    
     case (i1 < size bb'{hr}). 
     + smt(size_map).
     move => Hn.
@@ -3835,7 +3849,6 @@ while{1} ( ={BP.bb, BP.bb0, BP.bb1}
              = ((nth witness BP.bb{m0} i1).`1, (nth witness BP.bb{m0} i1).`2).
     + rewrite (nth_map witness); first smt().
       by rewrite /drop_last_of3. 
-    print nth_map.
     rewrite -(nth_map witness witness drop_last_of3). 
     + rewrite index_ge0. smt (index_mem size_map).
     smt(). 
@@ -3844,14 +3857,20 @@ while{1} ( ={BP.bb, BP.bb0, BP.bb1}
   + smt(size_cat nth_cat).
   + smt(size_cat nth_cat).
   + move: H11; rewrite size_cat //=; move => H11.
-    rewrite map_cat nth_cat.   
+    rewrite map_cat nth_cat.     
     case (i1 < size bb'{hr}). 
     + smt(size_map).
     move => Hn.
     have Hx: i1 = size bb'{hr} by smt().
     move: H12 H9; rewrite size_map -Hx //=. 
     move => H12 H9. 
-    smt(@List).
+    rewrite /drop_last_of3 in H12. 
+    rewrite /drop_last_of3 in H9. 
+    rewrite (nth_map witness witness 
+            (fun (x: (ident * upkey * supkey * commitment) * cipher * signature), (x.`1, x.`2)) i1 BP.bb{m0}) 
+            in H12; 1:smt(). 
+    smt().  
+
   + move: H11; rewrite size_cat //=; move => H11.
     rewrite map_cat nth_cat.   
     case (i1 < size bb'{hr}). 
@@ -4370,7 +4389,10 @@ while{1} ( ={BP.bb, BP.bb0, BP.bb1}
     have Hx: i1 = size bb'{hr} by smt().
     move: H12 H9; rewrite size_map -Hx //=. 
     move => H12 H9. 
-    smt(@List).
+    rewrite /drop_last_of3 in H12. 
+    rewrite /drop_last_of3 in H9. 
+    rewrite (nth_map witness witness (fun (x:(ident*upkey*supkey*commitment)*cipher*signature), (x.`1, x.`2)) i1 BP.bb{m0}) in H12; 1: by smt(). 
+    smt().      
   + move: H11; rewrite size_cat //=; move => H11.
     rewrite map_cat nth_cat.   
     case (i1 < size bb'{hr}). 
@@ -5073,8 +5095,22 @@ wp;sp.
 exists* (glob Ev), BS.sk{hr}, l, c3. elim* => gev sk l c3.  
 call (Edec_Odec_vo gev sk l c3).
 auto;progress. smt(). smt().    
-smt(@List @SmtMap). 
- smt(). smt(). smt(). smt(@List). smt(). 
+rewrite (take_nth witness i1{hr} cL0{hr}); 1:done. 
+rewrite -cats1 -H map_cat.
+have -> : map (fun (b1 : cipher * ident) =>
+              if ! ((b1.`1, b1.`2) \in BS.encL{hr}) then
+                dec_cipher_vo BS.sk{hr} b1.`2 b1.`1 HRO.ERO.m{hr}
+             else None) [(c3{hr}, l{hr})] = [None] by smt(). 
+done. 
+ smt(). smt(). smt(). 
+rewrite (take_nth witness i1{hr} cL0{hr}); 1:done. 
+rewrite -cats1 -H map_cat.
+have -> : map (fun (b1 : cipher * ident) =>
+              if ! ((b1.`1, b1.`2) \in BS.encL{hr}) then
+                dec_cipher_vo BS.sk{hr} b1.`2 b1.`1 HRO.ERO.m{hr}
+             else None) [(c3{hr}, l{hr})] = 
+           [dec_cipher_vo BS.sk{hr} l{hr} c3{hr} HRO.ERO.m{hr}] by smt(). 
+ done. smt(). 
 auto;progress. 
 + by rewrite size_ge0. 
 + by rewrite take0.  
@@ -5379,18 +5415,24 @@ wp;sp.
 exists* (glob Ev), BS.sk{hr}, l, c3. elim* => gev sk l c3.  
  call (Edec_Odec_vo gev sk l c3).
 auto;progress. smt(). smt().    
-smt(@List @SmtMap). 
- smt(). smt(). smt(). smt(@List). smt().  
+rewrite (take_nth witness i1{hr} cL0{hr}); 1:done. 
+rewrite -cats1 -H map_cat. 
+smt(@List). 
+ smt(). smt(). smt(). 
+rewrite (take_nth witness i1{hr} cL0{hr}); 1:done. 
+rewrite -cats1 -H map_cat. 
+smt(@List). 
+smt().  
 auto;progress. 
 + by rewrite size_ge0. 
 + by rewrite take0.  
 + smt(). 
 + have Hi: i1_R = size BP.bb{2} by smt(size_map).
-  smt( take_size).
+smt(take_size). 
 qed.
 
 
-(**** Some useful lemmas for the final SMT call ****)
+(**** Some useful lemmas for the final lemma ****)
 local lemma G2L_G3R_cca &m : 
     BP.setidents{m} = BP.setH{m} `|` BP.setD{m} =>
     `| Pr[G2L(Ev,Ve,C,CP,SS,A,HRO.ERO,S).main() @ &m : res] - 
@@ -5412,25 +5454,8 @@ by rewrite -(G2R_G3R_equiv &m id_union) -(G1R_G2R_equiv &m id_union)
            -(G0R_G1R_equiv &m id_union) -(G0R'_G0R_equiv &m id_union) 
             (DU_MB_BPRIV_R_G0R'_equiv &m id_union). 
 qed. 
-
-local lemma DU_MB_BPRIV_L_G1L_equiv &m :
-    BP.setidents{m} = BP.setH{m} `|`BP.setD{m} =>
-    Pr[DU_MB_BPRIV_L(Selene(Ev,P,Ve,C,CP,SS),A,HRO.ERO,G).main() @ &m : res] = 
-    Pr[G0L(Ev,P,Ve,C,CP,SS,A,HRO.ERO,G).main() @ &m : res]. 
-proof. 
-move => id_union. 
-by rewrite (DU_MB_BPRIV_L_G0L'_equiv &m id_union) (G0L'_G0L_equiv &m id_union). 
-qed. 
-
-local lemma G1L_IND1CCA_L_equiv &m :
-    BP.setidents{m} = BP.setH{m} `|` BP.setD{m} =>
-    Pr[G1L(Ev,Ve,C,CP,SS,A,HRO.ERO,S).main() @ &m : res] = 
-    Pr[Ind1CCA(Ev,BCCA(Selene(Ev,P,Ve,C,CP,SS),SS,CP,A,S),HRO.ERO,Left).main() @ &m : res]. 
-proof. 
-move => id_union. 
-by rewrite (G1L_G2L_equiv &m id_union) (G2L_CCA_left_equiv &m id_union). 
-qed. 
  
+
 lemma du_mb_bpriv &m : 
   BP.setidents{m} = BP.setH{m} `|` BP.setD{m} =>
   `| Pr[DU_MB_BPRIV_L(Selene(Ev,P,Ve,C,CP,SS),A,HRO.ERO,G).main() @ &m : res]
@@ -5446,28 +5471,40 @@ proof.
 move => id_union. 
 
 (** Add and subtract G1L to the first absolute value **)
-have -> : `|Pr[DU_MB_BPRIV_L(Selene(Ev, P, Ve, C, CP,SS), A, HRO.ERO, G).main() @ &m : res]
-          - Pr[DU_MB_BPRIV_R(Selene(Ev, P, Ve, C, CP,SS), A, HRO.ERO, G, S, Recover').main () @ &m : res]| 
-           = 
-          `|Pr[DU_MB_BPRIV_L(Selene(Ev, P, Ve, C, CP,SS), A, HRO.ERO, G).main() @ &m : res]
-          - Pr[G1L(Ev,Ve,C,CP,SS,A,HRO.ERO,S).main() @ &m : res]
-          + Pr[G1L(Ev,Ve,C,CP,SS,A,HRO.ERO,S).main() @ &m : res]
-          - Pr[DU_MB_BPRIV_R(Selene(Ev, P, Ve, C, CP,SS), A, HRO.ERO, G, S, Recover').main () @ &m : res]| 
+have -> : 
+    `|Pr[DU_MB_BPRIV_L(Selene(Ev, P, Ve, C, CP, SS), A, HRO.ERO, G).main() @ &m : res]
+    - Pr[DU_MB_BPRIV_R(Selene(Ev, P, Ve, C, CP, SS), A, HRO.ERO, G, S, Recover').main () @ &m : res]| 
+  = `|Pr[DU_MB_BPRIV_L(Selene(Ev, P, Ve, C, CP, SS), A, HRO.ERO, G).main() @ &m : res]
+    - Pr[G1L(Ev,Ve,C,CP,SS,A,HRO.ERO,S).main() @ &m : res]
+    + Pr[G1L(Ev,Ve,C,CP,SS,A,HRO.ERO,S).main() @ &m : res]
+    - Pr[DU_MB_BPRIV_R(Selene(Ev, P, Ve, C, CP, SS), A, HRO.ERO, G, S, Recover').main () @ &m : res]| 
   by smt().  
  
-(** Triangle inequality **)
-have triang : 
-      `|Pr[DU_MB_BPRIV_L(Selene(Ev, P, Ve, C, CP,SS), A, HRO.ERO, G).main() @ &m : res] 
-      - Pr[G1L(Ev,Ve,C,CP,SS,A,HRO.ERO,S).main() @ &m : res]
-      + Pr[G1L(Ev,Ve,C,CP,SS,A,HRO.ERO,S).main() @ &m : res]
-      - Pr[DU_MB_BPRIV_R(Selene(Ev, P, Ve, C, CP,SS), A, HRO.ERO, G, S, Recover').main () @ &m : res]| 
-      <=
-      `|Pr[DU_MB_BPRIV_L(Selene(Ev, P, Ve, C, CP,SS), A, HRO.ERO, G).main() @ &m : res]
-      - Pr[G1L(Ev,Ve,C,CP,SS,A,HRO.ERO,S).main() @ &m : res]| 
-    + `|Pr[G1L(Ev,Ve,C,CP,SS,A,HRO.ERO,S).main() @ &m : res] 
-      - Pr[DU_MB_BPRIV_R(Selene(Ev, P, Ve, C, CP,SS), A, HRO.ERO, G, S, Recover').main () @ &m : res]|
-  by smt(@Real). 
-by smt. 
+rewrite (DU_MB_BPRIV_L_G0L'_equiv &m); 1:done.
+rewrite (G0L'_G0L_equiv &m); 1:done.  
+
+have H0 : `|Pr[G0L(Ev, P, Ve, C, CP, SS, A, HRO.ERO, G).main() @ &m : res] -
+            Pr[G1L(Ev, Ve, C, CP, SS, A, HRO.ERO, S).main() @ &m : res]| +
+          `|Pr[G1L(Ev, Ve, C, CP, SS, A, HRO.ERO, S).main() @ &m : res] -
+            Pr[DU_MB_BPRIV_R(Selene(Ev, P, Ve, C, CP, SS), A, HRO.ERO, G, S, Recover').main() @ &m : res]| <=
+            Pr[VFRS(Ev, BVFR(Selene(Ev, P, Ve, C, CP, SS), A, CP, SS), R, CP, SS, HRO.ERO, G).main() @ &m : res] +
+            Pr[VFRS(Ev, BVFR(Selene(Ev, P, Ve, C, CP, SS), A, CP, SS), R, CP, SS, HRO.ERO, S).main() @ &m : res] +
+          `|Pr[ZK_L(R(Ev, HRO.ERO), P, BZK(Ev, P, C, Ve, A, CP, SS, HRO.ERO), G).main() @ &m : res] -
+            Pr[ZK_R(R(Ev, HRO.ERO), S, BZK(Ev, P, C, Ve, A, CP, SS, HRO.ERO)).main() @ &m : res]| +
+          `|Pr[Ind1CCA(Ev, BCCA(Selene(Ev, P, Ve, C, CP, SS), SS, CP, A, S), HRO.ERO, Left).main() @ &m : res] -
+            Pr[Ind1CCA(Ev, BCCA(Selene(Ev, P, Ve, C, CP, SS), SS, CP, A, S), HRO.ERO, Right).main() @ &m : res]|. 
+
+rewrite (DU_MB_BPRIV_R_G3R_equiv &m); 1:done. 
+
+have -> : `|Pr[G1L(Ev, Ve, C, CP, SS, A, HRO.ERO, S).main() @ &m : res] -
+            Pr[G3R(Ev, Ve, C, CP, SS, A, HRO.ERO, S).main() @ &m : res]| = 
+          `|Pr[G2L(Ev, Ve, C, CP, SS, A, HRO.ERO, S).main() @ &m : res] -
+            Pr[G3R(Ev, Ve, C, CP, SS, A, HRO.ERO, S).main() @ &m : res]|
+  by rewrite (G1L_G2L_equiv &m). 
+
+rewrite (G2L_G3R_cca &m); 1:done.
+smt(G0L_G1L_zk_vfr).  
+smt(). 
 qed. 
 
 end section DU_MB_BPRIV. 
