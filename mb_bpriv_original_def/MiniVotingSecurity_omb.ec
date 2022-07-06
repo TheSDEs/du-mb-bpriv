@@ -2928,9 +2928,11 @@ seq 2 2 :  (={glob A, glob C, glob Ve, glob S, glob E, glob HRO.ERO, BP.setHchec
       if{2} => //; wp. 
       exists* (glob E){1}, BP.sk{1}, idl{1}, b{1};elim* => ee sk1 idl1 b1;progress.
       call{1} (Edec_Odec ee sk1 idl1 b1). 
-      skip;progress. rewrite H1. apply H4. smt().
+      skip;progress. rewrite H1. apply H4.
+      by move: H H0=> <- />.
       exists* (glob E){1}, BP.sk{1}, idl{1}, b{1};elim* => ee sk1 idl1 b1;progress. 
-      call (Edec_Odec_eq sk1 idl1 b1);skip;progress;smt(). skip;trivial.
+      by call (Edec_Odec_eq sk1 idl1 b1); auto=> /> &2 <-.
+      skip;trivial.
       wp; rnd;trivial. auto;progress. 
 qed.       
 
@@ -4208,7 +4210,15 @@ while ( ={j, BP.bb, dbb, BP.vmap, glob HRO.ERO} /\ (0 <= j{2})
 
 wp;sp. 
   if{1} =>//=. 
-  + auto=>/>; progress. do 3! congr. smt(). do 4! congr. smt(). smt(). smt(). smt(). smt(). 
+  + auto=>/>; progress.
+    + do 3! congr.
+      + smt().
+      do 4! congr.
+      + smt().
+      by move: H; case: ((nth witness BP.bb j){2})=> /#.
+    + smt().
+    + smt().
+    smt(). 
   exists* (glob E){1}, BP.sk{1}, idl{1}, b{1};
     elim* => ge sk idl b. 
   call{1} (Edec_Odec ge sk idl b). 

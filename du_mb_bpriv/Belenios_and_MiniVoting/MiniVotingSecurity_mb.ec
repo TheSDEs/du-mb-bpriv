@@ -2547,7 +2547,7 @@ seq  3  2: (   ={glob A, glob S, glob C, glob E, glob HRO.ERO, glob P, glob Ve, 
              /\ size bb'{1} = i0{1}
              /\ size BP.bb0{1} = size BP.bb1{1}
              /\ (forall j, 
-                   j < size bb'{1} => 
+                   0 <= j < size bb'{1} => 
                    ! nth witness BP.bb{2} j \in rem_ids BP.bb1{1} =>
                          nth witness bb'{1} j = nth witness BP.bb{2} j) 
              /\ bb0{1} = rem_ids BP.bb0{1} 
@@ -2557,14 +2557,14 @@ seq  3  2: (   ={glob A, glob S, glob C, glob E, glob HRO.ERO, glob P, glob Ve, 
                    (nth witness (rem_ids BP.bb0{1}) j).`1 = 
                    (nth witness (rem_ids BP.bb1{1}) j).`1) 
              /\ (forall j, 
-                   j < size bb'{1} => 
+                   0 <= j < size bb'{1} => 
                       (nth witness bb'{1} j).`1 = (nth witness BP.bb{2} j).`1) 
              /\ (forall j, 
                    0 <= j < size bb'{1} => 
                       (nth witness BP.bb{2} j) \in rem_ids BP.bb1{1} =>
                            (nth witness bb'{1} j \in rem_ids BP.bb0{1}))  
              /\ (forall j, 
-                   0<= j < size bb'{1} => 
+                   0 <= j < size bb'{1} => 
                       (nth witness BP.bb{2} j)  \in rem_ids BP.bb1{2} =>
                           (nth witness bb'{1} j)
                            = nth witness (rem_ids BP.bb0{1}) 
@@ -2577,9 +2577,10 @@ seq  3  2: (   ={glob A, glob S, glob C, glob E, glob HRO.ERO, glob P, glob Ve, 
          split; 1:smt(size_cat).
          split; 1:smt(size_cat nth_cat).
          split.
-         + move=> j; rewrite size_cat nth_cat /=.
-           move=> /ltzS /lez_eqVlt [->>|^ /h3] />.
-           by rewrite h2 nth_index // pb0P.
+         + move=> j ge0_j; rewrite size_cat nth_cat /=.
+           move=> /ltzS /lez_eqVlt [->>|^ j_lt_bb'] />.
+           + by rewrite h2 nth_index // pb0P.
+           by move=> _; exact: h3.
          split.
          + move=> j ge0_j; rewrite size_cat nth_cat /=.
            move=> /ltzS /lez_eqVlt [->> _|/> j_lt_sizebb'] />.
@@ -2597,11 +2598,15 @@ seq  3  2: (   ={glob A, glob S, glob C, glob E, glob HRO.ERO, glob P, glob Ve, 
      move=> pb0_notin_bb1; split.
      + split; 1:smt(size_ge0).
        split; 1:smt(size_cat).
-       split; 1:smt(size_cat nth_cat).
        split.
-       + move=> j; rewrite size_cat nth_cat /=.
-         move=> /ltzS /lez_eqVlt [->>|^ /h3] />.
-         by rewrite -pb0P.
+       + move=> j ge0_j; rewrite size_cat nth_cat /=.
+         move=> /ltzS /lez_eqVlt [->>|^ j_lt_bb'] />.
+         by move=> _; exact: h1.
+       split.
+       + move=> j ge0_j; rewrite size_cat nth_cat /=.
+         move=> /ltzS /lez_eqVlt [->>|^ j_lt_sizebb'] />.
+         + by rewrite -pb0P.
+         by move=> _; exact: h3.
        split.
        + move=> j ge0_j; rewrite size_cat nth_cat /=.
          move=> /ltzS /lez_eqVlt [->>|/> j_lt_sizebb'] />.
@@ -2618,14 +2623,18 @@ seq  3  2: (   ={glob A, glob S, glob C, glob E, glob HRO.ERO, glob P, glob Ve, 
    move=> h _ h'; have {h h'} eq_size': size bb' = size BP.bb{2} by smt().
    move=> eq_rngF eq_fstF rem_idsF eq_dec_lkupF.
    rewrite eq_size' /=; split.
-   + move=> j; case: (j < size bb').
+   + move=> j; case: (0 <= j < size bb').
      + exact: eq_rngF.
-     move=> ^ /lezNgt /nth_default ->.
-     by rewrite eq_size'=> /lezNgt /nth_default ->.
-   move=> j; case: (j < size bb').
+     case: (0 <= j)=> /> => [_|].
+     + move=> ^ /lezNgt /nth_default ->.
+       by rewrite eq_size'=> /lezNgt /nth_default ->.
+     by move=> /ltzNge /(nth_neg<:label * cipher>) ^ -> ->.
+   move=> j; case: (0 <= j < size bb').
    + exact: eq_fstF.
-   move=> ^ /lezNgt /nth_default ->.
-   by rewrite eq_size'=> /lezNgt /nth_default ->.
+   case: (0 <= j)=> /> => [_|].
+   + move=> ^ /lezNgt /nth_default ->.
+     by rewrite eq_size'=> /lezNgt /nth_default ->.
+   by move=> /ltzNge /(nth_neg<:label * cipher>) ^ -> ->.
 (*** FIXME: THe following remains to clean up!!! **)
 (* We are ready to enter the while loop and prove dbb eq *)
 while (={j, glob HRO.ERO, glob E, dbb, BP.sk, BP.bb0, BP.bb1, BP.sk, dbb}  /\ size BP.bb'{1} = size BP.bb{2}
@@ -3065,7 +3074,15 @@ while ( ={j, BP.bb, dbb, BP.vmap, glob HRO.ERO} /\ (0 <= j{2})
                 else None) (flip BP.bb{2}))). 
   wp;sp. 
   if{1} =>//=. 
-  + auto=>/>; progress. do 3! congr. smt(). do 4! congr. smt(). smt(). smt(). smt(). smt(). 
+  + auto=>/>; progress.
+    + do 3! congr.
+      + smt().
+      do 4! congr.
+      + smt().
+      by move: H; case: ((nth witness BP.bb j){2})=> /#.
+    + smt().
+    + smt().
+    smt().
   exists* (glob E){1}, BP.sk{1}, idl{1}, b{1};
     elim* => ge sk idl b. 
   call{1} (Edec_Odec ge sk idl b). 
@@ -3411,7 +3428,7 @@ have ? : `|Pr[DU_MB_BPRIV_L(MV(E, P, Ve, C), A, HRO.ERO, G).main() @ &m : res] -
            Pr[G1L(E, Ve, C, A, HRO.ERO, S).main() @ &m : res]| +
          `|Pr[G1L(E, Ve, C, A, HRO.ERO, S).main() @ &m : res] - 
            Pr[DU_MB_BPRIV_R(MV(E, P, Ve, C), A, HRO.ERO, G, S, Recover').main() @ &m : res]| by smt(@Real). 
-by smt. 
+by smt.
 qed.
 
 end section DU_MB_BPRIV. 
