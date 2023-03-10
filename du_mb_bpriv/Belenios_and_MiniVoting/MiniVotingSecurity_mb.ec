@@ -3412,23 +3412,44 @@ lemma du_mb_bpriv &m :
        -  Pr[Ind1CCA(E,BCCA(MV(E,P,Ve,C),A,S),HRO.ERO,Right).main() @ &m : res]|.
 proof. 
 
-(* add and subtract G1L to first abs value *)
-have -> :  `|Pr[DU_MB_BPRIV_L(MV(E,P,Ve,C),A,HRO.ERO,G).main() @ &m : res] - 
-             Pr[DU_MB_BPRIV_R(MV(E,P,Ve,C),A,HRO.ERO,G,S,Recover').main() @ &m : res]| = 
-             `|Pr[DU_MB_BPRIV_L(MV(E,P,Ve,C),A,HRO.ERO,G).main() @ &m : res] - 
-               Pr[G1L(E,Ve,C,A,HRO.ERO,S).main() @ &m : res] +
-            Pr[G1L(E,Ve,C,A,HRO.ERO,S).main() @ &m : res] - 
-            Pr[DU_MB_BPRIV_R(MV(E,P,Ve,C),A,HRO.ERO,G,S,Recover').main() @ &m : res]| by smt(@Real). 
-(* triangle inequality *)
-have ? : `|Pr[DU_MB_BPRIV_L(MV(E, P, Ve, C), A, HRO.ERO, G).main() @ &m : res] - 
-           Pr[G1L(E, Ve, C, A, HRO.ERO, S).main() @ &m : res] +
-           Pr[G1L(E, Ve, C, A, HRO.ERO, S).main() @ &m : res] - 
-           Pr[DU_MB_BPRIV_R(MV(E, P, Ve, C), A, HRO.ERO, G, S, Recover').main() @ &m : res]| <=
-         `|Pr[DU_MB_BPRIV_L(MV(E, P, Ve, C), A, HRO.ERO, G).main() @ &m : res] - 
-           Pr[G1L(E, Ve, C, A, HRO.ERO, S).main() @ &m : res]| +
-         `|Pr[G1L(E, Ve, C, A, HRO.ERO, S).main() @ &m : res] - 
-           Pr[DU_MB_BPRIV_R(MV(E, P, Ve, C), A, HRO.ERO, G, S, Recover').main() @ &m : res]| by smt(@Real). 
-by smt.
-qed.
+move => id_union.  
+
+(** Add and subtract G1L to the first absolute value **)
+have -> : 
+    `|Pr[DU_MB_BPRIV_L(MV(E, P, Ve, C), A, HRO.ERO, G).main() @ &m : res]
+    - Pr[DU_MB_BPRIV_R(MV(E, P, Ve, C), A, HRO.ERO, G, S, Recover').main () @ &m : res]| 
+  = `|Pr[DU_MB_BPRIV_L(MV(E, P, Ve, C), A, HRO.ERO, G).main() @ &m : res]
+    - Pr[G1L(E,Ve,C,A,HRO.ERO,S).main() @ &m : res]
+    + Pr[G1L(E,Ve,C,A,HRO.ERO,S).main() @ &m : res]
+    - Pr[DU_MB_BPRIV_R(MV(E, P, Ve, C), A, HRO.ERO, G, S, Recover').main () @ &m : res]| 
+  by smt().  
+  
+rewrite (DU_MB_BPRIV_L_G0L'_equiv &m HRO.ERO). 
+rewrite (G0L'_G0L_equiv &m).   
+
+have H0 : `|Pr[G0L(E, P, Ve, C, A, HRO.ERO, G).main() @ &m : res] -
+            Pr[G1L(E, Ve, C, A, HRO.ERO, S).main() @ &m : res]| +
+          `|Pr[G1L(E, Ve, C, A, HRO.ERO, S).main() @ &m : res] -
+            Pr[DU_MB_BPRIV_R(MV(E, P, Ve, C), A, HRO.ERO, G, S, Recover').main() @ &m : res]| <=
+            Pr[VFR(E, BVFR(MV(E, P, Ve, C), A), R(E), HRO.ERO, G).main() @ &m : res] +
+            Pr[VFR(E, BVFR(MV(E, P, Ve, C), A), R(E), HRO.ERO, S).main() @ &m : res] +
+          `|Pr[ZK_L(R(E, HRO.ERO), P, BZK(E, P, C, Ve, A, HRO.ERO), G).main() @ &m : res] -
+            Pr[ZK_R(R(E, HRO.ERO), S, BZK(E, P, C, Ve, A, HRO.ERO)).main() @ &m : res]| +
+          `|Pr[Ind1CCA(E, BCCA(MV(E, P, Ve, C), A, S), HRO.ERO, Left).main() @ &m : res] -
+            Pr[Ind1CCA(E, BCCA(MV(E, P, Ve, C), A, S), HRO.ERO, Right).main() @ &m : res]|. 
+
+rewrite (DU_MB_BPRIV_R_G3R_equiv &m); 1:done. 
+
+have -> : `|Pr[G1L(E, Ve, C, A, HRO.ERO, S).main() @ &m : res] -
+            Pr[G3R(E, P, Ve, C, A, HRO.ERO, S).main() @ &m : res]| = 
+          `|Pr[G2L(E, Ve, C, A, HRO.ERO, S).main() @ &m : res] -
+            Pr[G3R(E, P, Ve, C, A, HRO.ERO, S).main() @ &m : res]|
+  by rewrite (G1L_G2L_equiv &m). 
+
+rewrite (G2L_G3R_cca &m). 
+smt(G0L_G1L_zk_vfr).  
+smt(). 
+
+qed. 
 
 end section DU_MB_BPRIV. 
